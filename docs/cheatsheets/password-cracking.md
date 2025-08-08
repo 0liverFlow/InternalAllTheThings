@@ -186,68 +186,77 @@ medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M ftp
 
 ### HTTP Basic Auth
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M http -m AUTH:BASIC -m DIR:/login.php
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M http -m AUTH:BASIC -m DIR:/login.php
 ```
 
 ### HTTP GET
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M web-form -m FORM:'/login.php' -m DENY-SIGNAL:'Login failed!' -m FORM-DATA:"get?username=&password="
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M web-form -m FORM:'/login.php' -m DENY-SIGNAL:'Login failed!' -m FORM-DATA:"get?username=&password="
 ```
 
 ### HTTP POST
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M web-form -m FORM:'/login.php' -m DENY-SIGNAL:'Incorrect username' -m FORM-DATA:"post?username=&password="
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M web-form -m FORM:'/login.php' -m DENY-SIGNAL:'Incorrect username' -m FORM-DATA:"post?username=&password="
 ```
 
 ### IMAP/S
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M imap
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M imap
 ```
 
 ### MSSQL
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M mssql
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M mssql
 ```
 Note : Medusa does not support MSSQL windows authentication
 
 ### MySQL
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M mysql
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M mysql
 ```
 
 ### POP3/S
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M pop3
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M pop3
 ```
 
 ### PostgreSQL
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M postgres -m DB:<DB_NAME>
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M postgres -m DB:<DB_NAME>
 ```
 
 ### RDP
 ```
-medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M rdp
 ```
 
 ### SMB
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M smbnt
 ```
 
-### SMTP/S
+### SMTP
+```
+medusa -h 10.10.10.10 -u '<email>' -P '<passwords.txt>' smtp
 ```
 
+### SMTPS
 ```
+medusa -h 10.10.10.10 -s -u '<email>' -P '<passwords.txt>' 
+```
+Note : This will target by default port 465. Use -n if you want to specify a different port
 
 ### SNMP
 ```
-
+medusa -h 10.10.10.10 -u '' -P '<passwords.txt>' -M snmp
 ```
+Notes: 
+1/ This will not work for SNMPv3 as it uses username and password for authenticattion rather than relying on community strings like SNMPv1 and SNMPv2.
+2/ You may notice that an empty username was specified in the command above. Unlikely, we cannot do otherwise as this is the behavior expected by Medusa
 
 ### SSH
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M ssh
 ```
 
 ### Telnet
@@ -257,79 +266,110 @@ medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M
 
 ### VNC
 ```
-
+medusa -h 10.10.10.10 -u '' -P '<passwords.txt>' -M vnc
 ```
+Note: The username is normally not required for this attack to work. Nevertheless, it was specified because Medusa needs it to work.
 
 ## Patator
 
 ### FTP
 ```
-
+patator ftp_login host=10.10.10.10 user=<user> password=FILE0 0=<passwords.txt> -x ignore:mesg='Login incorrect.' -x ignore,reset,retry:code=500
 ```
+
+### FTPS
+```
+patator ftp_login host=10.10.10.10 tls=1 user=<user> password=FILE0 0=<passwords.txt> -x ignore:mesg='Login incorrect.' -x ignore,reset,retry:code=500
+```
+As already explained above, this will conduct by default an explicit FTPS bruteforce attack. To conduct an implicit FTPS bruteforce, you only need to specify the port number using the port option.
 
 ### HTTP Basic Auth
 ```
-
+patator http_fuzz url=http://10.10.10.10/login.php user_pass=COMBO00:COMBO01 0=<combo.txt> -x 'ignore:code=401'
 ```
 
 ### HTTP GET
 ```
-
+patator http_fuzz url='http://10.10.10.10/login.php?username=<user>&password=FILE0' 0=<passwords.txt> method=GET accept_cookie=1 follow=1 -x ignore:fgrep='Incorrect username or password'
 ```
+accept_cookie=1 will accept received cookies from the server and use them to issue future requests
+follow=1 will follow redirections
 
 ### HTTP POST
 ```
-
+patator http_fuzz url=http://10.10.10.10/login.php method=POST body='username=<user>&password=FILE0' 0=<passwords.txt> accept_cookie=1 follow=1 -x ignore:fgrep='Incorrect username or password'
 ```
 
-### IMAP/S
+### IMAP
+```
+patator imap_login host=10.10.10.10 user=<email> password=FILE0 0=<passwords.txt> -x 'ignore:fgrep=Authentication failed.'
 ```
 
+### IMAPS
+```
+patator imap_login host=10.10.10.10 port=993 ssl=1 user=<email> password=FILE0 0=<passwords.txt> -x 'ignore:fgrep=Authentication failed.'
 ```
 
-### MSSQL
+### MSSQL (SQL server Authentication)
+```
+patator mssql_login host=10.10.10.10 user=<sa> password=FILE0 0=<passwords.txt> -x ignore:fgrep='Login failed for user'
 ```
 
+### MSSQL (Windows Authentication)
+```
+patator mssql_login windows_auth=1 host=10.10.10.10 user=<user> password=FILE0 0=<passwords.txt> -x ignore:fgrep='Login failed.'
 ```
 
 ### MySQL
 ```
-
+patator mysql_login host=10.10.10.10 user=<user> password=FILE0 0=<passwords.txt> -x ignore:fgrep='Access denied for user'
 ```
 
-### POP3/S
+### POP3
+```
+patator pop_login host=10.10.10.10 user=<user> password=FILE0 0=<passwords.txt> -x 'ignore:fgrep=Authentication failed.'
 ```
 
+### POP3S
+```
+patator pop_login host=10.10.10.10 port=995 ssl=1 user=<user> password=FILE0 0=<passwords.txt> -x 'ignore:fgrep=Authentication failed.'
 ```
 
 ### PostgreSQL
 ```
-
+patator pgsql_login host=10.10.10.10 database=<dbname> user=<user> password=FILE0 0=<passwords.txt> -x ignore:fgrep='password authentication failed for user'
 ```
+database is the database to test. This will only be useful if the user 
 
 ### RDP
 ```
-
+patator rdp_login host=10.10.10.10  user=<user> password=FILE0 0=<passwords.txt>
 ```
+Warning: This module does not work properly as patator does not provide a way to filter authentication failure messages. You can use hydra as an alternative
 
 ### SMB
 ```
+patator smb_login host=10.10.10.10 user=<user> password=FILE0 0=<passwords.txt> -x ignore:fgrep='STATUS_LOGON_FAILURE'
+```
+
+### SMTP
+```
 
 ```
 
-### SMTP/S
+### SMTPS
 ```
 
 ```
 
 ### SNMP
 ```
-
+patator snmp_login host=10.10.10.10 community=FILE0 0=<passwords.txt> -x ignore:mesg='No SNMP response received before timeout'
 ```
 
 ### SSH
 ```
-
+patator ssh_login host=10.10.10.10 user=<user> password=FILE0 0=<passwords.txt> -x ignore:mesg='Authentication failed.'
 ```
 
 ### Telnet
@@ -339,19 +379,24 @@ medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M
 
 ### VNC
 ```
-
+patator vnc_login host=10.10.10.10 password=FILE0 0=<passwords.txt> --threads 1 --max-retries -1 -x 'ignore:fgrep=Authentication failure' -x quit:code=0
 ```
 
 ## NetExec
 
 ### FTP
 ```
-
+nxc ftp 10.10.10.10 --username '<user>' --password <passwords.txt>
 ```
 
-### MSSQL
+### MSSQL (SQL Server Authentication)
+```
+nxc mssql 10.10.10.10 --username '<user>' --password <passwords.txt>
 ```
 
+### MSSQL (Windows Authentication)
+```
+nxc mssql 10.10.10.10 [--domain <domain>] --username '<user' --password <passwords.txt>
 ```
 
 ### RDP
