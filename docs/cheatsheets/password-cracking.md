@@ -53,7 +53,7 @@
     * [SMB](#smb)
     * [SMTP/S](#smtp/s)
     * [SNMP](#snmp)
-    * [SSH](#ssh)
+    * [SSH/SFTP](#ssh/sftp)
     * [Telnet](#telnet)
     * [VNC](#vnc)
 
@@ -63,7 +63,7 @@
     * [MSSQL Windows Authentication](#mssql-windowsauthentication)
     * [RDP](#rdp)
     * [SMB](#smb)
-    * [SSH](#ssh)
+    * [SSH/SFTP](#ssh/sftp)
     * [VNC](#vnc)
 
  * [Kerbrute](#kerbrute)
@@ -86,30 +86,23 @@ hydra -l <username> -P <passwords.txt> 10.10.10.10 ftp
 
 ### HTTP Basic Auth
 ```
-hydra -L '<users.txt>' -P '<passwords.txt>' 10.10.10.10 http-get /
+hydra -L '<users.txt>' -P '<passwords.txt>' 10.10.10.10 http-get /login.php
 ```
 
 ### HTTP GET
 ```
-hydra -L '<users.txt>' -P '<passwords.txt>' 10.10.10.10 http-get-form '<url>:<form _parameters>:<condition_string>'
-
-e.g: hydra -l foobar -P rockyou.txt 10.10.10.10 http-get-form '/login/index.php:username=^USER^&password=^PASS^:Incorrect username or password'
+hydra -l <user> -P <passwords.txt> 10.10.10.10 http-get-form '/login.php:username=^USER^&password=^PASS^:Incorrect username or password'
 ```
 Note : Use https-get-form module for https websites with get method.
 
 ### HTTP POST
 ```
-hydra -L '<users.txt>' -P '<passwords.txt>' 10.10.10.10 http-post-form '<url>:<form _parameters>:<condition_string>'
-
-e.g : hydra -l foobar -P rockyou.txt 10.10.10.10 http-post-form '/login/index.php:username=^USER^&password=^PASS^:S=logout.php'
+hydra -l <user> -P <passwords.txt> 10.10.10.10 http-post-form '/login.php:username=^USER^&password=^PASS^:Incorrect username or password'
 ```
-It's important to choose a good condition string, otherwise hydra may return false positives. When facing a situation where the web server is not returning any error message after a failed authentication, we can use a condition string like
-'S=logout.php' if this page was found during the file fuzzing enumeration. Indeed, this page must normally be visible after a successful login attempt.
-Note : Use https-post-form module for https websites with post method.
 
 ### IMAP/S
 ```
-hydra -L '<emails.txt>' -P '<passwords.txt>' 10.10.10.10 imap
+hydra -l '<email>' -P '<passwords.txt>' 10.10.10.10 imap
 ```
 
 ### MSSQL SQL Server Authentication
@@ -142,8 +135,9 @@ hydra -L '<emails.txt>' -P '<passwords.txt>' 10.10.10.10 pop3s
 
 ### PostgreSQL
 ```
-hydra -l '<user>' -P <passwords.txt> 10.10.10.10 postgres 
+hydra -l '<username>' -P <passwords.txt> 10.10.10.10 postgres
 ```
+Hydra did not work fine
 
 ### RDP
 ```
@@ -157,7 +151,7 @@ hydra -L '<users.txt>' -P '<passwords.txt>' 10.10.10.10 smb
 
 ### SMTP/S
 ```
-hydra -L '<emails.txt>' -P '<wordlist.txt>' 10.10.10.10 smtp
+hydra -L '<emails.txt>' -P '<passwords.txt>' 10.10.10.10 smtp
 ```
 
 ### SNMP
@@ -172,7 +166,7 @@ hydra -L '<users.txt>' -P '<passwords.txt>' 10.10.10.10 ssh
 
 ### Telnet
 ```
-
+hydra -L '<users.txt>' -P '<passwords.txt>' 10.10.10.10 telnet
 ```
 
 ### VNC
@@ -187,52 +181,53 @@ Notes:
 
 ### FTP
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M ftp
 ```
 
 ### HTTP Basic Auth
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M http -m AUTH:BASIC -m DIR:/login.php
 ```
 
 ### HTTP GET
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M web-form -m FORM:'/login.php' -m DENY-SIGNAL:'Login failed!' -m FORM-DATA:"get?username=&password="
 ```
 
 ### HTTP POST
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M web-form -m FORM:'/login.php' -m DENY-SIGNAL:'Incorrect username' -m FORM-DATA:"post?username=&password="
 ```
 
 ### IMAP/S
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M imap
 ```
 
 ### MSSQL
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M mssql
 ```
+Note : Medusa does not support MSSQL windows authentication
 
 ### MySQL
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M mysql
 ```
 
 ### POP3/S
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M pop3
 ```
 
 ### PostgreSQL
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M postgres -m DB:<DB_NAME>
 ```
 
 ### RDP
 ```
-
+medusa -h 10.10.10.10 -u '<user>' -P <passwords.txt> -M
 ```
 
 ### SMB
